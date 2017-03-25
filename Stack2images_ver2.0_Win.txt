@@ -1,0 +1,385 @@
+ver = "Stack2images ver2.0170325";
+
+//リフレッシュ（余計なウィンドウがあると動作に支障が出るので閉じる）------------------------------------------------
+//現在開かれている画像一覧を取得
+list = getList("image.titles");
+if(list.length>0){
+	//何かの画像が開かれていた場合
+	//確認メッセージ表示後、開かれているすべての画像ウィンドウを閉じる
+	showMessageWithCancel(ver, "You have to close all images first.\nAre you sure to close?");
+	close("*");
+}
+//--------------------------------------------------------------------------------------リフレッシュ終了
+
+//Tiffが置いてあるフォルダを選択させ、パスをinputとする。
+input = getDirectory("Choose an \Input directory");
+
+//input内のファイル一覧を取得する
+list = getFileList(input);
+
+//ユーザー設定ここから/////////////////////////////////////////////////////////////////////////////////
+//Stack数を訪ねるダイアログを作成--------------------------------------------------------------------
+Dialog.create("Step 1/3");
+	//最小値2、最大値6、初期値4（最大値は念のため多めに確保した）
+	Dialog.addSlider("How many stacks ? ", 2, 6, 4);
+	//Sampling mode：階調設定した直後のTiffを保存する。（階調設定が正しくできたか確認する用）
+	//Dialog.addCheckbox("Sampling mode", false);
+Dialog.show();
+//--------------------------------------------------------------------------------Stack数設定ここまで
+
+//Stack数をStacknumberとして保存
+Stacknumber = Dialog.getNumber();
+//SamplingMode = Dialog.getCheckbox();
+
+//Stack名を記入するダイアログを作成------------------------------------------------------------------
+Dialog.create("Step 2/3");
+	labels = newArray(Stacknumber); //入力欄のラベルを入れておく配列
+	defaults = newArray(Stacknumber);	//入力欄の初期値を入れておく配列
+
+	//0,1番目の名前欄にはあらかじめPhase,DNAが入っているという親切設計。
+	defaults[0] = "Phase";
+	labels[0] = "Stack1";
+	Dialog.addString(labels[0],defaults[0],8);	//8は「入力欄の幅＝半角スペース8文字分」の意味。
+
+	defaults[1] = "DNA";
+	labels[1] = "Stack2";
+	Dialog.addString(labels[1],defaults[1],8);
+
+	//2番目以降の入力欄には数字を入れておく。
+	for(i=2; i<Stacknumber; i++){
+		labels[i] = "Stack" + i+1;
+		defaults[i] = i+1;
+		Dialog.addString(labels[i],defaults[i],8);
+	}
+Dialog.show();
+//--------------------------------------------------------------------------------Stack名設定ここまで
+
+//Stack名を配列Stacknameに保存
+Stackname = newArray(Stacknumber);
+for(i=0; i<Stacknumber; i++){
+	Stackname[i] = Dialog.getString();
+}
+
+//Stack名の被りチェック------------------------------------------------------------------------------
+for(F1=1; F1>0;){
+
+	//i番Stackの名前と
+	for(i=1,F1=0; i<Stacknumber; i++){
+		//0～i-1番Stackの名前を比較検討
+		for(j=0; j<i; j++){
+			//被りを発見した時点で検査中止
+			if(Stackname[i] == Stackname[j]){
+				F1=1;
+				break;
+			}
+		}
+		if(F1==1){
+			break;
+		}
+	}
+
+	//被りがあれば命名のやり直しを促し、再び被りチェックに戻る
+	if(F1==1){
+		showMessageWithCancel("Error", "Some stacks have duplicated name.\nStackname must be unique.");
+		Dialog.create("Step 2/3");
+		for(i=0; i<Stacknumber; i++){
+			Dialog.addString(labels[i],Stackname[i],8);
+		}
+		Dialog.show();
+
+		//Stack名を配列Stacknameに保存
+		for(i=0; i<Stacknumber; i++){
+		Stackname[i] = Dialog.getString();
+		}
+	}
+}
+//--------------------------------------------------------------------------------被りチェックここまで
+
+
+//Stackの色を指定するダイアログを作成-----------------------------------------------------------------
+Dialog.create("Step 3/3");
+	labels = newArray("Grays","Blue","Green","Red","Cyan","Magenta","Yellow");
+	//チェックボックスを制御する配列として前述のdefaultsをリセットして再利用。
+	defaults = newArray(7);
+
+	//0番StackはPhaseのはずなので、グレーにチェック
+	Dialog.addMessage(Stackname[0]);
+	defaults[0] = true;
+	Dialog.addCheckboxGroup(2,4,labels,defaults);
+
+	//1番StackはDNAのはずなので、グレーのチェックを外してブルーにチェック
+	Dialog.addMessage(Stackname[1]);
+	defaults[0] = false;
+	defaults[1] = true;
+	Dialog.addCheckboxGroup(2,4,labels,defaults);
+
+	//2番以降はブルーのチェックも外す
+	defaults[1] = false;
+	for(i=2; i<Stacknumber; i++){
+		Dialog.addMessage(Stackname[i]);
+		Dialog.addCheckboxGroup(2,4,labels,defaults);
+	}
+Dialog.show();
+//---------------------------------------------------------------------------------------色設定ここまで
+
+//色設定を各色名の配列に保存
+Grays = newArray(Stacknumber);
+Blue = newArray(Stacknumber);
+Green = newArray(Stacknumber);
+Red = newArray(Stacknumber);
+Cyan = newArray(Stacknumber);
+Magenta = newArray(Stacknumber);
+Yellow = newArray(Stacknumber);
+
+for(i=0; i<Stacknumber; i++){
+	Grays[i] = Dialog.getCheckbox();
+	Blue[i] = Dialog.getCheckbox();
+	Green[i] = Dialog.getCheckbox();
+	Red[i] = Dialog.getCheckbox();
+	Cyan[i] = Dialog.getCheckbox();
+	Magenta[i] = Dialog.getCheckbox();
+	Yellow[i] = Dialog.getCheckbox();
+}
+////////////////////////////////////////////////////////////////////////////////ユーザー設定ここまで////
+
+//input内に全体の保存先フォルダoutputを作成し、パスをoutputとする。
+File.makeDirectory(input + "\output");
+output = input + "\output";
+
+//ログ画面を作成
+title = "Stack2images_Log";
+t = "["+title+"]";
+if(isOpen(title)==1){
+	print(t, "\\Update:");
+}else{
+	run("Text Window...", "name="+title+" width=110 height=45 menu");
+	print(t, "S2v2 is creating log window...");	//一度書いて上書きすると、直接手入力できなくなる
+	print(t, "\\Update:");					//という仕様を利用して、ログ画面を保護する。
+}
+
+//開始時間を記録（ミリ秒）
+Start=getTime();
+
+//開始宣言----------------------------------------------------------------------------------------------
+print(t, "*** " +ver+ " is running. ***\n \n  ->  input: " +input+ "\n  ->  output: " +output+ "\n ");
+
+//Stack名設定の表示
+//  ->  Stack1/5="Phase", (Grays=1, Blue=0, Green=0, Red=0, Cyan=0, Magenta=0, Yellow=0)みたになる。
+for(i=0 ;i<Stacknumber ;i++){
+	print(t, "\n  ->  ");
+	print(t, "Stack" + i+1 + "/" +Stacknumber+ "=\"" +Stackname[i]+ "\"");
+	print(t, ", (Grays=" +Grays[i]+ ", Blue=" +Blue[i]+ ", Green=" +Green[i]+ ", Red=" +Red[i]+ 
+					", Cyan=" +Cyan[i]+ ", Magenta=" +Magenta[i]+ ", Yellow=" +Yellow[i]+ ")");
+}
+
+//if(SamplingMode==1){
+//	print(t, "\n \n  ->  Sampling mode is ENABLED");
+//}else{
+//	print(t, "\n \n  ->  Sampling mode is disabled");
+//}
+//-----------------------------------------------------------------------------------------------宣言終了
+
+selectWindow("ImageJ");	//ログ画面でImageJ本体が隠れるのはなんか嫌。
+
+//バッチモード突入。画像の表示を省いて処理速度アップ。
+setBatchMode(true);
+
+//ファイルリストにもとづく繰り返し処理ここから-----------------------------------------------------------
+for (h=0 ;h<list.length ;h++) {
+
+	//ディレクトリは静かにスキップ
+	F1 = File.isDirectory(input + "\\" + list[h]);
+	if(F1 == 1){
+		continue;
+	}
+
+	//リストh番のファイル名が「.tif」または「.tiff」で終わるか判定--------------------------------------------------------
+	F1 = endsWith(list[h], ".tif") | endsWith(list[h], ".tiff");
+	if(F1 == 0){
+		//.tifでない場合
+		print(t, "\n \n* \"" + list[h] + "\" is NOT a .tif file.\n   skipping...");
+		continue;
+	}
+	//-----------------------------------------------------------------------------------------.tif判定ここまで
+
+	print(t, "\n \n* \"" + list[h] + "\" is proccessing...");
+	//リストh番のファイルを開き、そのファイル名（拡張子なし）をFilenameとする。
+	open(input + "\\" + list[h]);
+	Filename = File.nameWithoutExtension;
+
+	//Stack数の判定-----------------------------------------------------------------------------------
+	//開いた画像のStack数を取得する。余分なデータはiに放り込む。
+	getDimensions(i, i, i, F1, i);
+
+	//実際のStack数とユーザーが設定したStack数を照合
+	if(F1 != Stackname.length){
+		//Stack数が一致しない場合
+		close("" + list[h]);
+
+		//Stack数が1の場合と1以上の場合でメッセージを変える。
+		if(F1 == 1){
+			print(t, "\n  ->  \"" + list[h] + "\" has no stack. skipping...");
+		}else{
+			print(t, "\n  ->  \"" + list[h] + "\" has " + F1 + " stacks. NOT " + Stackname.length + " stacks. skipping...");
+		}
+
+		continue;
+	}
+	//------------------------------------------------------------------------------stack数判定ここまで
+
+	//output内にファイル毎の保存用フォルダを作成し、パスをsavefolderとする。
+
+	//フォルダを作成する前に、「中身あり同名フォルダ」の有無を判定する
+	//方法：「中身あり同名フォルダ」がすでに存在すると仮定して、「中身あり同名フォルダ」の中身一覧を取得。
+	//一覧表の項目数が0以上なら「中身あり同名フォルダ」が存在すると判断できる。
+	F1 = getFileList(output + "\\" + Filename);
+
+		//存在するし、中身あり		→F1.length > 0	→名前を変えてフォルダ作成
+		//存在するが、空フォルダ	→F1.length = 0	→フォルダ作成（実際には作成されず、既存フォルダが再利用される）
+		//存在するが、フォルダでない	→F1.length = 0	→フォルダ作成
+		//存在しない			→F1.length = 0	→フォルダ作成
+
+	if(F1.length > 0){
+		//中身あり同名フォルダがある場合
+		//フォルダ名末尾に番号をふって上書きを回避する
+		//フォルダを作成する前に、「中身あり同名フォルダ」の有無を判定する
+		for (i=2 ;F1.length>0 ;) {
+			F1 = getFileList(output + "\\" + Filename + "-" + i);
+
+			if(F1.length > 0){
+				//中身あり同名フォルダがある場合
+
+				//番号を1増やす
+				i = i+1;
+			}
+		}
+
+		//output内にファイル毎の保存用フォルダ（番号付き）を作成し、パスをsavefolderとする。
+		File.makeDirectory(output + "\\" + Filename + "-" + i);
+		savefolder = output + "\\" + Filename + "-" + i;
+
+	}else{
+		//中身あり同名フォルダがない場合
+		//output内にファイル毎の保存用フォルダを作成し、パスをsavefolderとする。
+		File.makeDirectory(output + "\\" + Filename);
+		savefolder = output + "\\" + Filename;
+	}
+
+	//いつもの操作-------------------------------------------------------------------------
+
+	//階調設定
+	print(t, "\n  ->  setting display range from 0 to 4095(12bit)...");
+	setMinAndMax(3000, 4095);
+	call("ij.ImagePlus.setDefault16bitRange", 12);
+
+	//Sampling mode
+	//if(SamplingMode==1){
+	//	saveAs("tiff", savefolder + "\\" + Filename + "_0-4095(12bit).tif");
+	//}	
+
+	//8-bitへ変換
+	print(t, "\n  ->  converting to 8bit...");
+	run("8-bit");
+
+	//Tiffを分割
+	print(t, "\n  ->  running \"Stack to Images\"...");
+	run("Stack to Images");
+	//-----------------------------------------------------------------いつもの操作ここまで
+
+	//表示されている画像ウィンドウ一覧を取得
+	Stacklist = getList("image.titles");
+
+	//ウィンドウリストにもとづく繰り返し処理ここから--------------------------------------
+	for (i=0 ;i<Stacklist.length ;i++) {
+
+		//i番ウィンドウを選択
+		selectWindow("" + Stacklist[i]);
+
+		//色付け
+		if(Grays[i]==1){
+			print(t, "\n \n  **  coloring \"" + Stackname[i] + "\" with Grays...");
+			run("Grays");
+			//Tiffとしてsavefolder内に保存（命名規則：もとのTiffファイル名-Stack名(色).tif）
+			saveAs("tiff", savefolder + "\\" + Filename + "-" + Stackname[i] + "(Grays).tif");
+			print(t, "\n  ->  saved as " + Filename + "-" + Stackname[i] + " (Grays).tif");
+		}
+
+		if(Blue[i]==1){
+			print(t, "\n \n  **  coloring \"" + Stackname[i] + "\" with Blue...");
+			run("Blue");
+			saveAs("tiff", savefolder + "\\" + Filename + "-" + Stackname[i] + "(Blue).tif");
+			print(t, "\n  ->  saved as " + Filename + "-" + Stackname[i] + " (Blue).tif");
+		}
+
+		if(Green[i]==1){
+			print(t, "\n \n  **  coloring \"" + Stackname[i] + "\" with Green...");
+			run("Green");
+			saveAs("tiff", savefolder + "\\" + Filename + "-" + Stackname[i] + "(Green).tif");
+			print(t, "\n  ->  saved as " + Filename + "-" + Stackname[i] + " (Green).tif");
+		}
+
+		if(Red[i]==1){
+			print(t, "\n \n  **  coloring \"" + Stackname[i] + "\" with Red...");
+			run("Red");
+			saveAs("tiff", savefolder + "\\" + Filename + "-" + Stackname[i] + "(Red).tif");
+			print(t, "\n  ->  saved as " + Filename + "-" + Stackname[i] + " (Red).tif");
+		}
+
+		if(Cyan[i]==1){
+			print(t, "\n \n  **  coloring \"" + Stackname[i] + "\" with Cyan...");
+			run("Cyan");
+			saveAs("tiff", savefolder + "\\" + Filename + "-" + Stackname[i] + "(Cyan).tif");
+			print(t, "\n  ->  saved as " + Filename + "-" + Stackname[i] + " (Cyan).tif");
+		}
+
+		if(Magenta[i]==1){
+			print(t, "\n \n  **  coloring \"" + Stackname[i] + "\" with Magenta...");
+			run("Magenta");
+			saveAs("tiff", savefolder + "\\" + Filename + "-" + Stackname[i] + "(Magenta).tif");
+			print(t, "\n  ->  saved as " + Filename + "-" + Stackname[i] + " (Magenta).tif");
+		}
+
+		if(Yellow[i]==1){
+			print(t, "\n \n  **  coloring \"" + Stackname[i] + "\" with Yellow...");
+			run("Yellow");
+			saveAs("tiff", savefolder + "\\" + Filename + "-" + Stackname[i] + "(Yellow).tif");
+			print(t, "\n  ->  saved as " + Filename + "-" + Stackname[i] + " (Yellow).tif");
+		}
+	}
+	close("*");
+	//--------------------------------------ウィンドウリストにもとづく繰り返し処理ここまで
+
+	//ログに保存先を表示
+	print(t, "\n \n  ->  Done. Saved in " + savefolder);
+}
+//----------------------------------------------------------ファイルリストにもとづく繰り返し処理ここまで
+
+//終了宣言
+print(t, "\n \n*** All process was done correctly! ***");
+
+//終了時間を記録
+End=getTime();
+print(t, "\n   (Total time= "+End-Start+" msec)");
+
+//ログを出力------------------------------------------------------------------------------------
+//現在の時刻を取得。曜日、ミリ秒はいらないのでiに放り込む。
+getDateAndTime(year, month, i, dayOfMonth, hour, minute, second, i);
+
+//2桁にそろえる
+if(month+1<10){month="0" + month+1;}else{month=month+1;}
+if(dayOfMonth<10){dayOfMonth="0" + dayOfMonth;}
+if(hour<10){hour="0" + hour;}
+if(minute<10){minute="0" + minute;}
+if(second<10){second="0" + second;}
+
+//時刻からYYYYMMDD.HHMMSSという7桁.6桁のログ通し番号を作成する。
+Timestring="" +year+ "" +month+ "" +dayOfMonth+ "." +hour+ "" +minute+ "" +second;
+
+selectWindow(title);
+saveAs("text", output + "\\S2v2Log_" + Timestring + ".txt");
+//--------------------------------------------------------------------------------------------
+
+//念のためバッチモード解除。
+setBatchMode(false);
+
+showMessage(ver, "All process was done correctly!\nPlease confirm the results and log.")
