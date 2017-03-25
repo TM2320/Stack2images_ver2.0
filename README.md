@@ -1,6 +1,15 @@
 # Stack2images_ver2.0
 The most innovative ImageJ macro for automatic Tiff conversion.
+### 0.目次
+* [1.Stack2imagesについて](https://github.com/TM2320/Stack2images_ver2.0/blob/master/README.md#1stack2images%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6)
 
+* [2.使い方（簡易版）](https://github.com/TM2320/Stack2images_ver2.0/blob/master/README.md#2%E4%BD%BF%E3%81%84%E6%96%B9%E7%B0%A1%E6%98%93%E7%89%88)
+
+* [3.仕様](https://github.com/TM2320/Stack2images_ver2.0/blob/master/README.md#3%E4%BB%95%E6%A7%98)
+
+* [4.Update history](https://github.com/TM2320/Stack2images_ver2.0/blob/master/README.md#4update-history)
+
+___
 ### 1.Stack2imagesについて
 	
 > Tiff画像変換をもっと楽にしたい。―――
