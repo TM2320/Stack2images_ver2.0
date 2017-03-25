@@ -31,7 +31,7 @@ ___
 ___
 ### 2.使い方（簡易版）  
 ※S2v2では便宜上、分割前のTiffを「Tiff」、「Tiff」に含まれる1枚1枚の画像を「Stack」と呼んでいます。  
-※詳しい解説（画像付き）は[リンク先](http://soon...)、または同梱のpdfをご覧ください。
+※詳しい解説（画像付き）は[Wiki](http://soon...)をご覧ください。
 1. **起動**  
 `ImageJを起動します`
 
@@ -68,7 +68,7 @@ ___
 * 対応OS：Windows＆Mac
 ___
 ### 4.Update history  
-* 最新版：[2.0170325 (Download)](https://github.com/TM2320/Stack2images_ver2.0/tree/master/download)
+* 最新版：2.0170325 (Download: [Windows](https://raw.githubusercontent.com/TM2320/Stack2images_ver2.0/master/download/Stack2images_ver2.0_Win.txt) , [Mac](https://raw.githubusercontent.com/TM2320/Stack2images_ver2.0/master/download/Stack2images_ver2.0_Mac.txt))
 > - 2.0170325
 > 	- 【機能削除】	サンプリングモード廃止。（中間産物から階調設定の成否は判断できないと判明したため。）
 >	- 【仕様変更】
