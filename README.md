@@ -68,7 +68,7 @@ ___
 * 対応OS：Windows＆Mac
 ___
 ### 4.Update history  
-* 最新版：[2.0170325 (Download)]()
+* 最新版：[2.0170325 (Download)](https://github.com/TM2320/Stack2images_ver2.0/tree/master/download)
 > - 2.0170325
 > 	- 【機能削除】	サンプリングモード廃止。（中間産物から階調設定の成否は判断できないと判明したため。）
 >	- 【仕様変更】
