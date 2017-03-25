@@ -21,7 +21,7 @@ The most innovative ImageJ macro for automatic Tiff conversion.
 きっと、忘れられない体験になるでしょう。
 ___
 ### 2.使い方（簡易版）  
-※ここでは便宜上、分割前のTiffを「Tiff」、「Tiff」に含まれる1枚1枚の画像を「Stack」と呼んでいます。  
+※S2v2では便宜上、分割前のTiffを「Tiff」、「Tiff」に含まれる1枚1枚の画像を「Stack」と呼んでいます。  
 ※詳しい解説（画像付き）は[リンク先](http://soon...)、または同梱のpdfをご覧ください。
 1. **起動**  
 `ImageJを起動します`
