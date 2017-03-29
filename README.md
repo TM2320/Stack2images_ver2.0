@@ -1,5 +1,8 @@
 # Stack2images_ver2.0
 The most innovative ImageJ macro for automatic Tiff conversion.
+
+**最新版（ver2.0170330） Download: [Windows](https://raw.githubusercontent.com/TM2320/Stack2images_ver2.0/master/download/Stack2images_ver2.0_Win.txt) , [Mac](https://raw.githubusercontent.com/TM2320/Stack2images_ver2.0/master/download/Stack2images_ver2.0_Mac.txt)　（右クリックでリンク先を保存 or 左クリックで開いてコピペ）**
+
 ### 0.目次
 * [1.Stack2imagesについて](https://github.com/TM2320/Stack2images_ver2.0/blob/master/README.md#1stack2images%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6)
 
@@ -68,7 +71,9 @@ ___
 * 対応OS：Windows＆Mac
 ___
 ### 4.Update history  
-* 最新版：2.0170325 (Download: [Windows](https://raw.githubusercontent.com/TM2320/Stack2images_ver2.0/master/download/Stack2images_ver2.0_Win.txt) , [Mac](https://raw.githubusercontent.com/TM2320/Stack2images_ver2.0/master/download/Stack2images_ver2.0_Mac.txt))
+* 最新版（ver2.0170330） Download: [Windows](https://raw.githubusercontent.com/TM2320/Stack2images_ver2.0/master/download/Stack2images_ver2.0_Win.txt) , [Mac](https://raw.githubusercontent.com/TM2320/Stack2images_ver2.0/master/download/Stack2images_ver2.0_Mac.txt)　（右クリックでリンク先を保存 or 左クリックで開いてコピペ）
+> - 2.0170330
+>	- 【機能追加】	ファイル名に使えない文字を除去する機能。
 > - 2.0170325
 > 	- 【機能削除】	サンプリングモード廃止。（中間産物から階調設定の成否は判断できないと判明したため。）
 >	- 【仕様変更】
