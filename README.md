@@ -34,7 +34,7 @@ ___
 ___
 ### 2.使い方（簡易版）  
 ※S2v2では便宜上、分割前のTiffを「Tiff」、「Tiff」に含まれる1枚1枚の画像を「Stack」と呼んでいます。  
-※詳しい解説（画像付き）は[Wiki](http://soon...)をご覧ください。
+※詳しい解説（画像付き）は同梱の[pdf](https://github.com/tm2320/Stack2images_ver2.0/blob/master/download/S2v2%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95.pdf)をご覧ください。
 1. **起動**  
 `ImageJを起動します`
 
