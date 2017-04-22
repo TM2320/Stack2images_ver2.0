@@ -272,7 +272,7 @@ for (h=0 ;h<list.length ;h++) {
 
 	//階調設定
 	print(t, "\n  ->  setting display range from 0 to 4095(12bit)...");
-	setMinAndMax(3000, 4095);
+	setMinAndMax(0, 4095);
 	call("ij.ImagePlus.setDefault16bitRange", 12);
 
 	//Sampling mode
